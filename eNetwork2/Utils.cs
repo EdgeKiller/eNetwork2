@@ -1,9 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
+using System.Security.Cryptography;
 
 namespace eNetwork2
 {
-    class Utils
+    public class Utils
     {
         public static byte[] GetBuffer(byte[] buffer)
         {
@@ -17,6 +19,69 @@ namespace eNetwork2
             }
             Array.Copy(buffer, 0, result, 2, buffer.Length);
             return result;
+        }
+
+        public static byte[] Encrypt(byte[] buffer, string key)
+        {
+            PasswordDeriveBytes pdb =
+              new PasswordDeriveBytes(key,
+              new byte[] { 0x53, 0x6f, 0x64, 0x69, 0x75, 0x6d, 0x20, 0x43, 0x68, 0x6c, 0x6f, 0x72, 0x69, 0x64, 0x65 });
+            MemoryStream ms = new MemoryStream();
+            Aes aes = new AesManaged();
+            aes.Key = pdb.GetBytes(aes.KeySize / 8);
+            aes.IV = pdb.GetBytes(aes.BlockSize / 8);
+            CryptoStream cs = new CryptoStream(ms,
+              aes.CreateEncryptor(), CryptoStreamMode.Write);
+            cs.Write(buffer, 0, buffer.Length);
+            cs.Close();
+            return ms.ToArray();
+        }
+
+        public static byte[] Decrypt(byte[] buffer, string key)
+        {
+            PasswordDeriveBytes pdb =
+              new PasswordDeriveBytes(key, // Change this
+              new byte[] { 0x53, 0x6f, 0x64, 0x69, 0x75, 0x6d, 0x20, 0x43, 0x68, 0x6c, 0x6f, 0x72, 0x69, 0x64, 0x65 });
+            MemoryStream ms = new MemoryStream();
+            Aes aes = new AesManaged();
+            aes.Key = pdb.GetBytes(aes.KeySize / 8);
+            aes.IV = pdb.GetBytes(aes.BlockSize / 8);
+            CryptoStream cs = new CryptoStream(ms,
+              aes.CreateDecryptor(), CryptoStreamMode.Write);
+            cs.Write(buffer, 0, buffer.Length);
+            cs.Close();
+            return ms.ToArray();
+        }
+
+        public static byte[] Compress(byte[] buffer)
+        {
+            if (buffer == null)
+                return null;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (BufferedStream bs = new BufferedStream(new GZipStream(ms, CompressionMode.Compress), 2048))
+                {
+                    bs.Write(buffer, 0, buffer.Length);
+                }
+                return ms.ToArray();
+            }
+        }
+
+        public static byte[] Decompress(byte[] buffer)
+        {
+            if (buffer == null)
+                return null;
+            using (var compressedMs = new MemoryStream(buffer))
+            {
+                using (var decompressedMs = new MemoryStream())
+                {
+                    using (var bs = new BufferedStream(new GZipStream(compressedMs, CompressionMode.Decompress), 2048))
+                    {
+                        bs.CopyTo(decompressedMs);
+                    }
+                    return decompressedMs.ToArray();
+                }
+            }
         }
     }
 }

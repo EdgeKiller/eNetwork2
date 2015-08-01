@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -16,13 +17,15 @@ namespace eNetwork2
 
         private List<Task> TaskList;
 
-        private List<TcpClient> ClientList;
+        private List<eSClient> ClientList;
 
-        public delegate void DataReceivedHandler(TcpClient client, byte[] buffer);
+        public delegate void DataReceivedHandler(eSClient client, byte[] buffer);
         public event DataReceivedHandler OnDataReceived;
 
-        public delegate void ConnectionHandler(TcpClient client);
+        public delegate void ConnectionHandler(eSClient client);
         public event ConnectionHandler OnClientConnected, OnClientDisconnected;
+
+        private Random randomID;
 
         //Constructors
 
@@ -31,7 +34,8 @@ namespace eNetwork2
             Port = port;
             Listener = new TcpListener(IPAddress.Any, this.Port);
             TaskList = new List<Task>();
-            ClientList = new List<TcpClient>();
+            ClientList = new List<eSClient>();
+            randomID = new Random();
         }
 
         //Methods and functions
@@ -50,23 +54,28 @@ namespace eNetwork2
 
         public void SendToAll(byte[] buffer)
         {
-            foreach (TcpClient client in ClientList)
+            foreach (eSClient client in ClientList)
             {
                 byte[] b = Utils.GetBuffer(buffer);
-                client.GetStream().Write(b, 0, b.Length);
+                client.GetTcpClient().GetStream().Write(b, 0, b.Length);
             }
         }
 
-        public void SendToAllExcept(byte[] buffer, TcpClient exceptedClient)
+        public void SendToAllExcept(byte[] buffer, eSClient exceptedClient)
         {
-            foreach(TcpClient client in ClientList)
+            foreach(eSClient client in ClientList)
             {
                 if (client != exceptedClient)
                 {
                     byte[] b = Utils.GetBuffer(buffer);
-                    client.GetStream().Write(b, 0, b.Length);
+                    client.GetTcpClient().GetStream().Write(b, 0, b.Length);
                 }
             }
+        }
+
+        public List<eSClient> GetClientList()
+        {
+            return ClientList;
         }
 
         private void StartListen()
@@ -79,36 +88,41 @@ namespace eNetwork2
             while(true)
             {
                 TcpClient client = await this.Listener.AcceptTcpClientAsync();
-                ClientList.Add(client);
+                Int32 id = (Int32)randomID.Next(10000, 99999);
+                eSClient sClient = new eSClient(id, client);
+
+                byte[] idBuffer = new byte[4];
+
+                PacketWriter.WriteInt32(ref idBuffer, id);
+
+                client.GetStream().Write(idBuffer, 0, idBuffer.Length);
+
+                ClientList.Add(sClient);
                 if (OnClientConnected != null)
-                    OnClientConnected(client);
-                StartHandleClient(client);
+                    OnClientConnected(sClient);
+                StartHandleClient(sClient);
             }
         }
 
-        private void StartHandleClient(TcpClient client)
+        private void StartHandleClient(eSClient client)
         {
             TaskList.Add(HandleClientAsync(client));
         }
 
-        private async Task HandleClientAsync(TcpClient client)
+        private async Task HandleClientAsync(eSClient client)
         {
-            NetworkStream clientStream = client.GetStream();
+            NetworkStream clientStream = client.GetTcpClient().GetStream();
             byte[] buffer, bufferSize = new byte[2];
             int size;
 
             try
             {
-                while (client.Client.Connected)
+                while (client.GetTcpClient().Client.Connected)
                 {
                     await clientStream.ReadAsync(bufferSize, 0, bufferSize.Length);
-                    using (MemoryStream ms = new MemoryStream(bufferSize))
-                    {
-                        using (BinaryReader br = new BinaryReader(ms))
-                        {
-                            size = br.ReadInt16();
-                        }
-                    }
+
+                    size = PacketReader.ReadInt16(bufferSize);
+
                     buffer = new byte[size];
                     await clientStream.ReadAsync(buffer, 0, buffer.Length);
                     if (OnDataReceived != null)

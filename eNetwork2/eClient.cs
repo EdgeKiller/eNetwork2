@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -23,6 +24,8 @@ namespace eNetwork2
         public delegate void ConnectionHandler();
         public event ConnectionHandler OnConnected, OnDisconnected;
 
+        private int ID = -1;
+
         //Constructors
 
         public eClient(string hostname, int port)
@@ -38,6 +41,12 @@ namespace eNetwork2
         public void Connect()
         {
             Client.Connect(Hostname, Port);
+
+            byte[] idBuffer = new byte[4];
+            Client.GetStream().Read(idBuffer, 0, idBuffer.Length);
+
+            ID = PacketReader.ReadInt32(idBuffer);
+
             if (OnConnected != null)
                 OnConnected();
             StartHandle();
@@ -58,6 +67,11 @@ namespace eNetwork2
             Client.GetStream().Write(b, 0, b.Length);
         }
 
+        public int GetID()
+        {
+            return ID;
+        }
+
         private void StartHandle()
         {
             TaskList.Add(HandleAsync());
@@ -74,13 +88,9 @@ namespace eNetwork2
                 while (Client.Connected)
                 {
                     await clientStream.ReadAsync(bufferSize, 0, bufferSize.Length);
-                    using (MemoryStream ms = new MemoryStream(bufferSize))
-                    {
-                        using (BinaryReader br = new BinaryReader(ms))
-                        {
-                            size = br.ReadInt16();
-                        }
-                    }
+
+                    size = PacketReader.ReadInt16(bufferSize);
+
                     buffer = new byte[size];
                     await clientStream.ReadAsync(buffer, 0, buffer.Length);
                     if (OnDataReceived != null)

@@ -40,7 +40,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="eClient.cs" />
+    <Compile Include="eSClient.cs" />
     <Compile Include="eServer.cs" />
+    <Compile Include="PacketReader.cs" />
+    <Compile Include="PacketWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
