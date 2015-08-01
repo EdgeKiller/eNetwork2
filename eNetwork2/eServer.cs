@@ -49,7 +49,7 @@ namespace eNetwork2
         public void Stop()
         {
             Listener.Stop();
-            Task.WhenAll(TaskList).Wait();
+            //Task.WhenAll(TaskList).Wait();
         }
 
         public void SendToAll(byte[] buffer)
@@ -63,7 +63,7 @@ namespace eNetwork2
 
         public void SendToAllExcept(byte[] buffer, eSClient exceptedClient)
         {
-            foreach(eSClient client in ClientList)
+            foreach (eSClient client in ClientList)
             {
                 if (client != exceptedClient)
                 {
@@ -85,7 +85,7 @@ namespace eNetwork2
 
         private async Task ListenAsync()
         {
-            while(true)
+            while (true)
             {
                 TcpClient client = await this.Listener.AcceptTcpClientAsync();
                 Int32 id = (Int32)randomID.Next(10000, 99999);
@@ -121,7 +121,8 @@ namespace eNetwork2
                 {
                     await clientStream.ReadAsync(bufferSize, 0, bufferSize.Length);
 
-                    size = PacketReader.ReadInt16(bufferSize);
+                    PacketReader pr = new PacketReader(bufferSize);
+                    size = pr.ReadInt16();
 
                     buffer = new byte[size];
                     await clientStream.ReadAsync(buffer, 0, buffer.Length);

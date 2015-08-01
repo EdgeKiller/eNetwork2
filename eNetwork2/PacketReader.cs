@@ -3,71 +3,61 @@ using System.IO;
 
 namespace eNetwork2
 {
-    public static class PacketReader
+    public class PacketReader
     {
-        private static MemoryStream ms;
-        private static BinaryReader br;
+        private MemoryStream ms;
+        private BinaryReader br;
+        private byte[] buffer;
 
-        public static Int16 ReadInt16(byte[] buffer)
+        public PacketReader(byte[] buffer)
         {
+            this.buffer = buffer;
             ms = new MemoryStream(buffer);
             br = new BinaryReader(ms);
+        }
+
+        public Int16 ReadInt16()
+        {
             return br.ReadInt16();
         }
 
-        public static Int32 ReadInt32(byte[] buffer)
+        public Int32 ReadInt32()
         {
-            ms = new MemoryStream(buffer);
-            br = new BinaryReader(ms);
             return br.ReadInt32();
         }
 
-        public static Int64 ReadInt64(byte[] buffer)
+        public Int64 ReadInt64()
         {
-            ms = new MemoryStream(buffer);
-            br = new BinaryReader(ms);
             return br.ReadInt64();
         }
 
-        public static Boolean ReadBoolean(byte[] buffer)
+        public Boolean ReadBoolean()
         {
-            ms = new MemoryStream(buffer);
-            br = new BinaryReader(ms);
             return br.ReadBoolean();
         }
 
-        public static Byte ReadByte(byte[] buffer)
+        public Byte ReadByte()
         {
-            ms = new MemoryStream(buffer);
-            br = new BinaryReader(ms);
             return br.ReadByte();
         }
 
-        public static Char ReadChar(byte[] buffer)
+        public Char ReadChar()
         {
-            ms = new MemoryStream(buffer);
-            br = new BinaryReader(ms);
             return br.ReadChar();
         }
 
-        public static Decimal ReadDecimal(byte[] buffer)
+        public Decimal ReadDecimal()
         {
-            ms = new MemoryStream(buffer);
-            br = new BinaryReader(ms);
             return br.ReadDecimal();
         }
 
-        public static Double ReadDouble(byte[] buffer)
+        public Double ReadDouble()
         {
-            ms = new MemoryStream(buffer);
-            br = new BinaryReader(ms);
             return br.ReadDouble();
         }
 
-        public static String ReadString(byte[] buffer)
+        public String ReadString()
         {
-            ms = new MemoryStream(buffer);
-            br = new BinaryReader(ms);
             return br.ReadString();
         }
     }
