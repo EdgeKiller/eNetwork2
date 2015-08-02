@@ -93,7 +93,7 @@ namespace eNetwork2
 
                 byte[] idBuffer = new byte[4];
 
-                PacketWriter.WriteInt32(ref idBuffer, id);
+                //PacketWriter.WriteInt32(ref idBuffer, id);
 
                 client.GetStream().Write(idBuffer, 0, idBuffer.Length);
 
@@ -135,6 +135,16 @@ namespace eNetwork2
             ClientList.Remove(client);
             if (OnClientDisconnected != null)
                 OnClientDisconnected(client);
+        }
+
+        public int GetIDFromTcpClient(TcpClient client)
+        {
+            foreach(eSClient c in ClientList)
+            {
+                if (c.GetTcpClient() == client)
+                    return c.GetID();
+            }
+            return -1;
         }
 
     }

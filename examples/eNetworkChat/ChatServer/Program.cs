@@ -14,6 +14,8 @@ namespace ChatServer
         static void Main(string[] args)
         {
             server = new eServer(666);
+            server.OnClientConnected += Server_OnClientConnected;
+            server.OnClientDisconnected += Server_OnClientDisconnected;
             server.OnDataReceived += server_OnDataReceived;
 
             server.Start();
@@ -31,6 +33,16 @@ namespace ChatServer
             }
         }
 
+        private static void Server_OnClientDisconnected(eSClient client)
+        {
+            Console.WriteLine("Client disconnected : " + client.GetID());
+        }
+
+        private static void Server_OnClientConnected(eSClient client)
+        {
+            Console.WriteLine("Client connected : " + client.GetID());
+        }
+
         static void server_OnDataReceived(eSClient client, byte[] buffer)
         {
             PacketReader pr = new PacketReader(buffer);
@@ -38,9 +50,14 @@ namespace ChatServer
 
             if(ID == 1)
             {
-                server.SendToAll(buffer);
                 string message = pr.ReadString();
-                Console.WriteLine("Message received : " + message);
+                PacketWriter pw = new PacketWriter();
+                pw.WriteByte(ID);
+                pw.WriteInt32(server.GetIDFromTcpClient(client.GetTcpClient()));
+                pw.WriteString(message);
+                server.SendToAll(pw.ToArray());
+                
+                Console.WriteLine("Message received from " + client.GetID() + " : " + message);
             }
 
         }
