@@ -4,7 +4,7 @@ using System.Text;
 
 namespace eNetwork2
 {
-    public class PacketReader
+    public class PacketReader : IDisposable
     {
         private byte[] buffer;
         public int Position { get; set; }
@@ -97,6 +97,12 @@ namespace eNetwork2
                 sb.Append(ReadChar());
             }
             return sb.ToString();
+        }
+
+        public void Dispose()
+        {
+            buffer = null;
+            Position = 0;
         }
     }
 }

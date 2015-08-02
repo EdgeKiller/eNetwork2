@@ -4,7 +4,7 @@ using System.IO;
 
 namespace eNetwork2
 {
-    public class PacketWriter
+    public class PacketWriter : IDisposable
     {
         private List<Byte> buffer;
         public int Position { get; set; }
@@ -261,6 +261,13 @@ namespace eNetwork2
         public Byte[] ToArray()
         {
             return buffer.ToArray();
+        }
+
+        public void Dispose()
+        {
+            buffer.Clear();
+            buffer = null;
+            Position = 0;
         }
     }
 }

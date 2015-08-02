@@ -73,6 +73,16 @@ namespace eNetwork2
             }
         }
 
+        public int GetIDFromTcpClient(TcpClient client)
+        {
+            foreach (eSClient c in ClientList)
+            {
+                if (c.GetTcpClient() == client)
+                    return c.GetID();
+            }
+            return -1;
+        }
+
         public List<eSClient> GetClientList()
         {
             return ClientList;
@@ -91,9 +101,13 @@ namespace eNetwork2
                 Int32 id = (Int32)randomID.Next(10000, 99999);
                 eSClient sClient = new eSClient(id, client);
 
-                byte[] idBuffer = new byte[4];
+                byte[] idBuffer; 
 
-                //PacketWriter.WriteInt32(ref idBuffer, id);
+                using (PacketWriter pw = new PacketWriter())
+                {
+                    pw.WriteInt32(id);
+                    idBuffer = pw.ToArray();
+                }
 
                 client.GetStream().Write(idBuffer, 0, idBuffer.Length);
 
@@ -121,8 +135,10 @@ namespace eNetwork2
                 {
                     await clientStream.ReadAsync(bufferSize, 0, bufferSize.Length);
 
-                    PacketReader pr = new PacketReader(bufferSize);
-                    size = pr.ReadInt16();
+                    using (PacketReader pr = new PacketReader(bufferSize))
+                    {
+                        size = pr.ReadInt16();
+                    }
 
                     buffer = new byte[size];
                     await clientStream.ReadAsync(buffer, 0, buffer.Length);
@@ -135,16 +151,6 @@ namespace eNetwork2
             ClientList.Remove(client);
             if (OnClientDisconnected != null)
                 OnClientDisconnected(client);
-        }
-
-        public int GetIDFromTcpClient(TcpClient client)
-        {
-            foreach(eSClient c in ClientList)
-            {
-                if (c.GetTcpClient() == client)
-                    return c.GetID();
-            }
-            return -1;
         }
 
     }
