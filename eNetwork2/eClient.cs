@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -45,8 +43,10 @@ namespace eNetwork2
             byte[] idBuffer = new byte[4];
             Client.GetStream().Read(idBuffer, 0, idBuffer.Length);
 
-            PacketReader pr = new PacketReader(idBuffer);
-            ID = pr.ReadInt32();
+            using (PacketReader pr = new PacketReader(idBuffer))
+            {
+                ID = pr.ReadInt32();
+            }
 
             if (OnConnected != null)
                 OnConnected();
@@ -90,8 +90,10 @@ namespace eNetwork2
                 {
                     await clientStream.ReadAsync(bufferSize, 0, bufferSize.Length);
 
-                    PacketReader pr = new PacketReader(bufferSize);
-                    size = pr.ReadInt16();
+                    using (PacketReader pr = new PacketReader(bufferSize))
+                    {
+                        size = pr.ReadInt16();
+                    }
 
                     buffer = new byte[size];
                     await clientStream.ReadAsync(buffer, 0, buffer.Length);
