@@ -1,20 +1,24 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace eNetwork2
 {
+    /// <summary>
+    /// eClient
+    /// </summary>
     public class eClient
     {
 
-        //Fields
+        #region Variables
 
         private string Hostname;
-        private int Port;
+        private int Port, PortRequest;
 
         private List<Task> TaskList;
 
-        private TcpClient Client;
+        private TcpClient Client, ClientRequest;
 
         public delegate void DataReceivedHandler(byte[] buffer);
         public event DataReceivedHandler OnDataReceived;
@@ -24,21 +28,37 @@ namespace eNetwork2
 
         private int ID = -1;
 
-        //Constructors
+        #endregion
 
-        public eClient(string hostname, int port)
+        #region Constructors
+
+        /// <summary>
+        /// Constructor with hostname and the two ports
+        /// </summary>
+        /// <param name="hostname">Hostname</param>
+        /// <param name="port">Port</param>
+        /// <param name="portRequest">Port for request</param>
+        public eClient(string hostname, int port, int portRequest)
         {
             Hostname = hostname;
             Port = port;
+            PortRequest = portRequest;
             Client = new TcpClient();
+            ClientRequest = new TcpClient();
             TaskList = new List<Task>();
         }
 
-        //Methods and functions
+        #endregion
 
+        #region PublicMethodsAndFunctions
+
+        /// <summary>
+        /// Connect the client
+        /// </summary>
         public void Connect()
         {
             Client.Connect(Hostname, Port);
+            ClientRequest.Connect(Hostname, PortRequest);
 
             byte[] idBuffer = new byte[4];
             Client.GetStream().Read(idBuffer, 0, idBuffer.Length);
@@ -53,31 +73,92 @@ namespace eNetwork2
             StartHandle();
         }
 
+        /// <summary>
+        /// Disconnect the client
+        /// </summary>
         public void Disconnect()
         {
-            if(Client.Connected)
+            if (Client.Connected)
                 Client.Close();
+
+            if (ClientRequest.Connected)
+                ClientRequest.Close();
+
             if (OnDisconnected != null)
                 OnDisconnected();
+
             Task.WhenAll(TaskList).Wait();
         }
 
+        /// <summary>
+        /// Send a buffer
+        /// </summary>
+        /// <param name="buffer">Buffer to send</param>
         public void Send(byte[] buffer)
         {
             byte[] b = Utils.GetBuffer(buffer);
             Client.GetStream().Write(b, 0, b.Length);
         }
 
+        /// <summary>
+        /// Send a request
+        /// </summary>
+        /// <param name="buffer">Buffer to send</param>
+        /// <returns>Response</returns>
+        public byte[] SendRequest(byte[] buffer)
+        {
+            byte[] b = Utils.GetBuffer(buffer);
+            ClientRequest.GetStream().Write(b, 0, b.Length);
+
+            byte[] result, resultSize = new byte[2];
+            int size;
+
+            try
+            {
+                ClientRequest.GetStream().Read(resultSize, 0, resultSize.Length);
+
+                using (PacketReader pr = new PacketReader(resultSize))
+                {
+                    size = pr.ReadInt16();
+                }
+
+                result = new byte[size];
+                ClientRequest.GetStream().Read(result, 0, result.Length);
+                return result;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Get the ID
+        /// </summary>
+        /// <returns>ID</returns>
         public int GetID()
         {
             return ID;
         }
 
+        #endregion
+
+        #region PrivateMethodsAndFunctions
+
+        /// <summary>
+        /// Start handle client
+        /// </summary>
         private void StartHandle()
         {
             TaskList.Add(HandleAsync());
         }
 
+        /// <summary>
+        /// Handle client
+        /// </summary>
+        /// <returns></returns>
         private async Task HandleAsync()
         {
             NetworkStream clientStream = Client.GetStream();
@@ -105,5 +186,7 @@ namespace eNetwork2
 
             Disconnect();
         }
+
+        #endregion
     }
 }

@@ -4,17 +4,28 @@ using System.Text;
 
 namespace eNetwork2
 {
+    /// <summary>
+    /// Packet reader
+    /// </summary>
     public class PacketReader : IDisposable
     {
         private byte[] buffer;
         public int Position { get; set; }
 
+        /// <summary>
+        /// Constructor with buffer to read
+        /// </summary>
+        /// <param name="buffer"></param>
         public PacketReader(byte[] buffer)
         {
             this.buffer = buffer;
             Position = 0;
         }
 
+        /// <summary>
+        /// Read an int16
+        /// </summary>
+        /// <returns>Value</returns>
         public Int16 ReadInt16()
         {
             Int16 result = (Int16)(buffer[Position] | buffer[Position + 1] << 8);
@@ -22,6 +33,10 @@ namespace eNetwork2
             return result;
         }
 
+        /// <summary>
+        /// Read an int32
+        /// </summary>
+        /// <returns>Value</returns>
         public Int32 ReadInt32()
         {
             Int32 result = (Int32)(buffer[Position] | buffer[Position + 1] << 8 | buffer[Position + 2] << 16 | buffer[Position + 3] << 24);
@@ -29,6 +44,10 @@ namespace eNetwork2
             return result;
         }
 
+        /// <summary>
+        /// Read an int64
+        /// </summary>
+        /// <returns>Value</returns>
         public Int64 ReadInt64()
         {
             Int64 result = (Int64)(buffer[Position] | buffer[Position + 1] << 8 | buffer[Position + 2] << 16 | buffer[Position + 3] << 24 |
@@ -37,6 +56,10 @@ namespace eNetwork2
             return result;
         }
 
+        /// <summary>
+        /// Read a boolean
+        /// </summary>
+        /// <returns>Value</returns>
         public Boolean ReadBoolean()
         {
             Boolean result = (buffer[Position] == 1 ? true : false);
@@ -44,6 +67,10 @@ namespace eNetwork2
             return result;
         }
 
+        /// <summary>
+        /// Read a byte
+        /// </summary>
+        /// <returns>Value</returns>
         public Byte ReadByte()
         {
             Byte result = (buffer[Position]);
@@ -51,6 +78,10 @@ namespace eNetwork2
             return result;
         }
 
+        /// <summary>
+        /// Read a char
+        /// </summary>
+        /// <returns>Value</returns>
         public Char ReadChar()
         {
             Char result = (Char)buffer[Position];
@@ -58,6 +89,10 @@ namespace eNetwork2
             return result;
         }
 
+        /// <summary>
+        /// Read a decimal
+        /// </summary>
+        /// <returns>Value</returns>
         public Decimal ReadDecimal()
         {
             Decimal result;
@@ -73,6 +108,10 @@ namespace eNetwork2
             return result;
         }
 
+        /// <summary>
+        /// Read a double
+        /// </summary>
+        /// <returns>Value</returns>
         public Double ReadDouble()
         {
             Double result;
@@ -88,6 +127,29 @@ namespace eNetwork2
             return result;
         }
 
+        /// <summary>
+        /// Read a single
+        /// </summary>
+        /// <returns>Value</returns>
+        public Single ReadFloat()
+        {
+            Single result;
+            using (MemoryStream ms = new MemoryStream(buffer))
+            {
+                using (BinaryReader br = new BinaryReader(ms))
+                {
+                    br.BaseStream.Position = Position;
+                    result = br.ReadSingle();
+                }
+            }
+            Position += 4;
+            return result;
+        }
+        
+        /// <summary>
+        /// Read a string
+        /// </summary>
+        /// <returns>Value</returns>
         public String ReadString()
         {
             StringBuilder sb = new StringBuilder();
@@ -99,6 +161,9 @@ namespace eNetwork2
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Dispose the PacketReader, not necessary
+        /// </summary>
         public void Dispose()
         {
             buffer = null;

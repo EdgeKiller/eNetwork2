@@ -5,8 +5,16 @@ using System.Security.Cryptography;
 
 namespace eNetwork2
 {
+    /// <summary>
+    /// Utils class with useful fonctions
+    /// </summary>
     public class Utils
     {
+        /// <summary>
+        /// Set the size before the buffer
+        /// </summary>
+        /// <param name="buffer">Buffer to set size</param>
+        /// <returns>Buffer with the size</returns>
         public static byte[] GetBuffer(byte[] buffer)
         {
             byte[] result = new byte[buffer.Length + 2];
@@ -21,6 +29,12 @@ namespace eNetwork2
             return result;
         }
 
+        /// <summary>
+        /// Encrypt the buffer
+        /// </summary>
+        /// <param name="buffer">Buffer to encrypt</param>
+        /// <param name="key">Encryption key</param>
+        /// <returns>Encrypted buffer</returns>
         public static byte[] Encrypt(byte[] buffer, string key)
         {
             PasswordDeriveBytes pdb =
@@ -37,6 +51,12 @@ namespace eNetwork2
             return ms.ToArray();
         }
 
+        /// <summary>
+        /// Decrypt the buffer
+        /// </summary>
+        /// <param name="buffer">Buffer to decrypt</param>
+        /// <param name="key">Decryption key</param>
+        /// <returns>Decrypted buffer</returns>
         public static byte[] Decrypt(byte[] buffer, string key)
         {
             PasswordDeriveBytes pdb =
@@ -53,6 +73,11 @@ namespace eNetwork2
             return ms.ToArray();
         }
 
+        /// <summary>
+        /// Compress a buffer
+        /// </summary>
+        /// <param name="buffer">Buffer to compress</param>
+        /// <returns>Compressed buffer</returns>
         public static byte[] Compress(byte[] buffer)
         {
             if (buffer == null)
@@ -67,6 +92,11 @@ namespace eNetwork2
             }
         }
 
+        /// <summary>
+        /// Decompress a buffer
+        /// </summary>
+        /// <param name="buffer">Buffer to decompress</param>
+        /// <returns>Decompressed buffer</returns>
         public static byte[] Decompress(byte[] buffer)
         {
             if (buffer == null)
