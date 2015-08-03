@@ -18,7 +18,7 @@ namespace ChatClient
         public form_main()
         {
             InitializeComponent();
-            client = new eClient("127.0.0.1", 666);
+            client = new eClient("127.0.0.1", 666, 667);
             client.OnDataReceived += Client_OnDataReceived;
         }
 
