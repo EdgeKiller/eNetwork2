@@ -308,7 +308,7 @@ namespace eNetwork2
         /// Write a single
         /// </summary>
         /// <param name="value">Value</param>
-        public void WriteFloat(Single value)
+        public void WriteSingle(Single value)
         {
             Byte[] tempBuffer = new Byte[4];
             using (MemoryStream ms = new MemoryStream(tempBuffer))
@@ -329,7 +329,7 @@ namespace eNetwork2
         /// Overwrite a single, dont forget to modify position before
         /// </summary>
         /// <param name="value">Value</param>
-        public void OverWriteFloat(Single value)
+        public void OverWriteSingle(Single value)
         {
             if (Position + 4 < buffer.Count)
             {

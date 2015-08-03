@@ -17,23 +17,28 @@ New version of the eNetwork library. Fast, easy to use and lightweight library f
 //Import the library
 using eNetwork2;
 
-//Declare new eServer with the port
-eServer server = new eServer(2048);
+//Declare new eServer with the main port and the request port
+eServer server = new eServer(2048, 4096);
 
 //Add events
 server.OnDataReceived += server_OnDataReceived;
+server.OnRequestReceived += server_OnRequestReceived;
 server.OnClientConnected += server_OnClientConnected;
 server.OnClientDisconnected += server_OnClientDisconnected;
 
-void server_OnClientConnected(TcpClient client)
+void server_OnClientConnected(eSClient client)
 {
 }
 
-void server_OnClientDisconnected(TcpClient client)
+void server_OnClientDisconnected(eSClient client)
 {
 }
 
-void server_OnDataReceived(TcpClient client, byte[] buffer)
+void server_OnDataReceived(eSClient client, byte[] buffer)
+{
+}
+
+void server_OnRequestReceived(TcpClient client, byte[] buffer)
 {
 }
 
@@ -44,8 +49,15 @@ server.Start();
 server.Stop();
 
 //Send data
+server.SendTo(buffer, client); //Client must be a TcpClient or an eSClient and buffer an byte array
 server.SendToAll(buffer); //Buffer must be an byte array
-server.SendToAllExcept(client, buffer); //Client must be a TcpClient and buffer an byte array
+server.SendToAllExcept(buffer, client); //Client must be a TcpClient and buffer an byte array
+
+//Get TcpClient from an ID
+int id = server.GetIDFromTcpClient(client); //Client must be a TcpClient
+
+//Get client list
+List<eSClient> list = server.GetClientList();
 ```
 
 #### • eClient
@@ -54,8 +66,8 @@ server.SendToAllExcept(client, buffer); //Client must be a TcpClient and buffer 
 //Import the library
 using eNetwork2;
 
-//Declare new eClient with the IP and the port
-eClient client = new eClient("127.0.0.1", 2048);
+//Declare new eClient with the IP, the main port and the request port
+eClient client = new eClient("127.0.0.1", 2048, 4096);
 
 //Add events
 client.OnDataReceived += client_OnDataReceived;
@@ -70,7 +82,7 @@ void client_OnDisconnected()
 {
 }
 
-void client_OnDataReceived(byte[] data)
+void client_OnDataReceived(byte[] buffer)
 {
 }
 
@@ -82,4 +94,10 @@ client.Disconnect();
 
 //Send data
 client.Send(buffer); //Buffer must be an byte array
+
+//Send request
+byte[] response = client.SendRequest(buffer); //Buffer must be an byte array
+
+//Get ID
+int id = client.GetID();
 ```
