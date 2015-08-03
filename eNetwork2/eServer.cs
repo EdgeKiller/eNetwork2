@@ -11,6 +11,7 @@ namespace eNetwork2
     /// </summary>
     public class eServer
     {
+
         #region Variables
 
         private int Port, PortRequest;
@@ -88,7 +89,7 @@ namespace eNetwork2
         public void SendTo(byte[] buffer, eSClient client)
         {
             byte[] b = Utils.GetBuffer(buffer);
-            client.GetTcpClient().GetStream().Write(b, 0, b.Length);
+            client.GetTcpClient().Send(b);
         }
 
         /// <summary>
@@ -99,7 +100,7 @@ namespace eNetwork2
         public void SendTo(byte[] buffer, TcpClient client)
         {
             byte[] b = Utils.GetBuffer(buffer);
-            client.GetStream().Write(b, 0, b.Length);
+            client.Send(b);
         }
 
         /// <summary>
@@ -111,7 +112,7 @@ namespace eNetwork2
             foreach (eSClient client in ClientList)
             {
                 byte[] b = Utils.GetBuffer(buffer);
-                client.GetTcpClient().GetStream().Write(b, 0, b.Length);
+                client.GetTcpClient().Send(b);
             }
         }
 
@@ -127,7 +128,7 @@ namespace eNetwork2
                 if (client != exceptedClient)
                 {
                     byte[] b = Utils.GetBuffer(buffer);
-                    client.GetTcpClient().GetStream().Write(b, 0, b.Length);
+                    client.GetTcpClient().Send(b);
                 }
             }
         }
@@ -188,7 +189,7 @@ namespace eNetwork2
                     idBuffer = pw.ToArray();
                 }
 
-                client.GetStream().Write(idBuffer, 0, idBuffer.Length);
+                client.Send(idBuffer);
 
                 ClientList.Add(sClient);
                 if (OnClientConnected != null)

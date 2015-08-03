@@ -97,7 +97,7 @@ namespace eNetwork2
         public void Send(byte[] buffer)
         {
             byte[] b = Utils.GetBuffer(buffer);
-            Client.GetStream().Write(b, 0, b.Length);
+            Client.Send(b);
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace eNetwork2
         public byte[] SendRequest(byte[] buffer)
         {
             byte[] b = Utils.GetBuffer(buffer);
-            ClientRequest.GetStream().Write(b, 0, b.Length);
+            ClientRequest.Send(b);
 
             byte[] result, resultSize = new byte[2];
             int size;

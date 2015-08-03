@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 
 namespace eNetwork2
@@ -8,7 +9,7 @@ namespace eNetwork2
     /// <summary>
     /// Utils class with useful fonctions
     /// </summary>
-    public class Utils
+    public static class Utils
     {
         /// <summary>
         /// Set the size before the buffer
@@ -112,6 +113,16 @@ namespace eNetwork2
                     return decompressedMs.ToArray();
                 }
             }
+        }
+
+        /// <summary>
+        /// Extension of TcpClient
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="buffer"></param>
+        public static void Send(this TcpClient client, byte[] buffer)
+        {
+            client.GetStream().Write(buffer, 0, buffer.Length);
         }
     }
 }
