@@ -13,7 +13,7 @@ namespace ChatServer
 
         static void Main(string[] args)
         {
-            server = new eServer(666, 667);
+            server = new eServer(666);
             server.OnClientConnected += Server_OnClientConnected;
             server.OnClientDisconnected += Server_OnClientDisconnected;
             server.OnDataReceived += server_OnDataReceived;

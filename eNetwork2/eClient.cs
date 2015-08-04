@@ -18,7 +18,7 @@ namespace eNetwork2
 
         private List<Task> TaskList;
 
-        private TcpClient Client, ClientRequest;
+        private TcpClient Client, ClientRequest = null;
 
         public delegate void DataReceivedHandler(byte[] buffer);
         public event DataReceivedHandler OnDataReceived;
@@ -38,13 +38,16 @@ namespace eNetwork2
         /// <param name="hostname">Hostname</param>
         /// <param name="port">Port</param>
         /// <param name="portRequest">Port for request</param>
-        public eClient(string hostname, int port, int portRequest)
+        public eClient(string hostname, int port, int portRequest = -1)
         {
             Hostname = hostname;
             Port = port;
             PortRequest = portRequest;
+
             Client = new TcpClient();
-            ClientRequest = new TcpClient();
+            if (PortRequest != -1)
+                ClientRequest = new TcpClient();
+
             TaskList = new List<Task>();
         }
 
@@ -58,7 +61,9 @@ namespace eNetwork2
         public void Connect()
         {
             Client.Connect(Hostname, Port);
-            ClientRequest.Connect(Hostname, PortRequest);
+
+            if (ClientRequest != null)
+                ClientRequest.Connect(Hostname, PortRequest);
 
             byte[] idBuffer = new byte[4];
             Client.GetStream().Read(idBuffer, 0, idBuffer.Length);
@@ -81,8 +86,11 @@ namespace eNetwork2
             if (Client.Connected)
                 Client.Close();
 
-            if (ClientRequest.Connected)
-                ClientRequest.Close();
+            if (ClientRequest != null)
+            {
+                if (ClientRequest.Connected)
+                    ClientRequest.Close();
+            }
 
             if (OnDisconnected != null)
                 OnDisconnected();
@@ -107,30 +115,36 @@ namespace eNetwork2
         /// <returns>Response</returns>
         public byte[] SendRequest(byte[] buffer)
         {
-            byte[] b = Utils.GetBuffer(buffer);
-            ClientRequest.Send(b);
-
-            byte[] result, resultSize = new byte[2];
-            int size;
-
-            try
+            if (ClientRequest != null)
             {
-                ClientRequest.GetStream().Read(resultSize, 0, resultSize.Length);
+                byte[] b = Utils.GetBuffer(buffer);
+                ClientRequest.Send(b);
 
-                using (PacketReader pr = new PacketReader(resultSize))
+                byte[] result, resultSize = new byte[2];
+                int size;
+
+                try
                 {
-                    size = pr.ReadInt16();
+                    ClientRequest.GetStream().Read(resultSize, 0, resultSize.Length);
+
+                    using (PacketReader pr = new PacketReader(resultSize))
+                    {
+                        size = pr.ReadInt16();
+                    }
+
+                    result = new byte[size];
+                    ClientRequest.GetStream().Read(result, 0, result.Length);
+                    return result;
                 }
-
-                result = new byte[size];
-                ClientRequest.GetStream().Read(result, 0, result.Length);
-                return result;
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
-            catch(Exception ex)
+            else
             {
-                Console.WriteLine(ex.Message);
+                throw new Exception("This client cant send request.");
             }
-
             return null;
         }
 

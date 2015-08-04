@@ -11,6 +11,7 @@ namespace eNetwork2
     /// </summary>
     public static class Utils
     {
+
         /// <summary>
         /// Set the size before the buffer
         /// </summary>
@@ -124,5 +125,6 @@ namespace eNetwork2
         {
             client.GetStream().Write(buffer, 0, buffer.Length);
         }
+
     }
 }

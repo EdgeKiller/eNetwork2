@@ -16,7 +16,7 @@ namespace eNetwork2
 
         private int Port, PortRequest;
 
-        private TcpListener Listener, ListenerRequest;
+        private TcpListener Listener, ListenerRequest = null;
 
         private List<Task> TaskList;
 
@@ -42,13 +42,14 @@ namespace eNetwork2
         /// </summary>
         /// <param name="port">Port</param>
         /// <param name="portRequest">Port for request</param>
-        public eServer(int port, int portRequest)
+        public eServer(int port, int portRequest = -1)
         {
             Port = port;
             PortRequest = portRequest;
-
             Listener = new TcpListener(IPAddress.Any, Port);
-            ListenerRequest = new TcpListener(IPAddress.Any, PortRequest);
+
+            if(PortRequest != -1)
+                ListenerRequest = new TcpListener(IPAddress.Any, PortRequest);
 
             TaskList = new List<Task>();
             ClientList = new List<eSClient>();
@@ -66,10 +67,14 @@ namespace eNetwork2
         public void Start()
         {
             Listener.Start();
-            ListenerRequest.Start();
+
+            if (ListenerRequest != null)
+                ListenerRequest.Start();
 
             StartListen();
-            StartListenRequest();
+
+            if (PortRequest != -1)
+                StartListenRequest();
         }
 
         /// <summary>
@@ -77,7 +82,13 @@ namespace eNetwork2
         /// </summary>
         public void Stop()
         {
-            Listener.Stop();
+            if (Listener.Server.Connected)
+                Listener.Stop();
+            if (ListenerRequest != null)
+            {
+                if (ListenerRequest.Server.Connected)
+                    ListenerRequest.Stop();
+            }
             //Task.WhenAll(TaskList).Wait();
         }
 

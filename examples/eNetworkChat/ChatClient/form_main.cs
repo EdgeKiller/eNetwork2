@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using eNetwork2;
 
@@ -18,7 +11,7 @@ namespace ChatClient
         public form_main()
         {
             InitializeComponent();
-            client = new eClient("127.0.0.1", 666, 667);
+            client = new eClient("127.0.0.1", 666);
             client.OnDataReceived += Client_OnDataReceived;
         }
 
