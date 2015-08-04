@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 // l'ensemble d'attributs suivant. Changez les valeurs de ces attributs pour modifier les informations
 // associées à un assembly.
 [assembly: AssemblyTitle("eNetwork2")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Library for easy networking with .NET")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("EdgeKiller")]
 [assembly: AssemblyProduct("eNetwork2")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCopyright("Apache License 2.0 - 2015")]
+[assembly: AssemblyTrademark("EdgeKiller")]
 [assembly: AssemblyCulture("")]
 
 // L'affectation de la valeur false à ComVisible rend les types invisibles dans cet assembly 
