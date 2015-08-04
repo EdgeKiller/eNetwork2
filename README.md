@@ -8,6 +8,7 @@ New version of the eNetwork library. Fast, easy to use and lightweight library f
 - Send byte array with dynamic size
 - Compatible with all .NET languages
 - Asynchronous
+- Requests
 
 ## How to use ?
 
@@ -17,12 +18,12 @@ New version of the eNetwork library. Fast, easy to use and lightweight library f
 //Import the library
 using eNetwork2;
 
-//Declare new eServer with the main port and the request port
+//Declare new eServer with the main port (and the optional request port)
 eServer server = new eServer(2048, 4096);
 
 //Add events
 server.OnDataReceived += server_OnDataReceived;
-server.OnRequestReceived += server_OnRequestReceived;
+server.OnRequestReceived += server_OnRequestReceived; //Need to have request port in the constructor
 server.OnClientConnected += server_OnClientConnected;
 server.OnClientDisconnected += server_OnClientDisconnected;
 
@@ -66,7 +67,7 @@ List<eSClient> list = server.GetClientList();
 //Import the library
 using eNetwork2;
 
-//Declare new eClient with the IP, the main port and the request port
+//Declare new eClient with the IP, the main port (and the optional request port)
 eClient client = new eClient("127.0.0.1", 2048, 4096);
 
 //Add events
@@ -96,7 +97,90 @@ client.Disconnect();
 client.Send(buffer); //Buffer must be an byte array
 
 //Send request
-byte[] response = client.SendRequest(buffer); //Buffer must be an byte array
+byte[] response = client.SendRequest(buffer); //Buffer must be an byte array and need to specify request port in constructor
+
+//Get ID
+int id = client.GetID();
+```
+
+#### • eUtils
+
+```csharp
+//Import the library
+using eNetwork2;
+
+//Write size in a buffer
+byte[] correctBuffer = eUtils.GetBuffer(buffer); //Buffer must be an byte array
+
+//Encrypt a buffer
+byte[] encryptedBuffer = eUtils.Encrypt(buffer, key); //Buffer must be an byte array and key a string
+
+//Decrypt a buffer
+byte[] decryptedBuffer = eUtils.Decrypt(buffer, key); //Buffer must be an byte array and key a string
+
+//Compress a buffer
+byte[] compressedBuffer = eUtils.Compress(buffer); //Buffer must be an byte array
+
+//Decompress a buffer
+byte[] decompressedBuffer = eUtils.Decompress(buffer); //Buffer must be an byte array
+```
+
+#### • PacketWriter
+
+```csharp
+//Import the library
+using eNetwork2;
+
+//Create new PacketWriter
+PacketWriter pw = new PacketWriter();
+
+//Write value
+pw.WriteInt16(value);
+
+//Overwrite a value
+pw.Position -= 2; //Set the position
+pw.OverWriteInt16(value); //Overwrite the value
+
+//Get byte array
+byte[] buffer = pw.ToArray();
+
+//Set the position
+pw.Position = 0;
+
+//Dispose
+pw.Dispose();
+```
+
+#### • PacketReader
+
+```csharp
+//Import the library
+using eNetwork2;
+
+//Create new PacketReader with buffer
+PacketReader pr = new PacketReader(buffer); //Buffer must be an byte array
+
+//Read a value
+Int16 value = pr.ReadInt16();
+
+//Set the position
+pr.Position = 0;
+
+//Dispoe
+pr.Dispose();
+```
+
+#### • eSClient (Server side)
+
+```csharp
+//Import the library
+using eNetwork2;
+
+//Declare new eSClient with TcpClient and ID (server side)
+eSClient client = new eSClient(id, tcpClient);
+
+//Get TcpClient
+TcpClient tcpClient = client.GetTcpClient();
 
 //Get ID
 int id = client.GetID();

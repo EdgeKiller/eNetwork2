@@ -99,7 +99,7 @@ namespace eNetwork2
         /// <param name="client">Client</param>
         public void SendTo(byte[] buffer, eSClient client)
         {
-            byte[] b = Utils.GetBuffer(buffer);
+            byte[] b = eUtils.GetBuffer(buffer);
             client.GetTcpClient().Send(b);
         }
 
@@ -110,7 +110,7 @@ namespace eNetwork2
         /// <param name="client">Client</param>
         public void SendTo(byte[] buffer, TcpClient client)
         {
-            byte[] b = Utils.GetBuffer(buffer);
+            byte[] b = eUtils.GetBuffer(buffer);
             client.Send(b);
         }
 
@@ -122,7 +122,7 @@ namespace eNetwork2
         {
             foreach (eSClient client in ClientList)
             {
-                byte[] b = Utils.GetBuffer(buffer);
+                byte[] b = eUtils.GetBuffer(buffer);
                 client.GetTcpClient().Send(b);
             }
         }
@@ -138,7 +138,7 @@ namespace eNetwork2
             {
                 if (client != exceptedClient)
                 {
-                    byte[] b = Utils.GetBuffer(buffer);
+                    byte[] b = eUtils.GetBuffer(buffer);
                     client.GetTcpClient().Send(b);
                 }
             }

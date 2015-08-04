@@ -104,7 +104,7 @@ namespace eNetwork2
         /// <param name="buffer">Buffer to send</param>
         public void Send(byte[] buffer)
         {
-            byte[] b = Utils.GetBuffer(buffer);
+            byte[] b = eUtils.GetBuffer(buffer);
             Client.Send(b);
         }
 
@@ -117,7 +117,7 @@ namespace eNetwork2
         {
             if (ClientRequest != null)
             {
-                byte[] b = Utils.GetBuffer(buffer);
+                byte[] b = eUtils.GetBuffer(buffer);
                 ClientRequest.Send(b);
 
                 byte[] result, resultSize = new byte[2];

@@ -9,7 +9,7 @@ namespace eNetwork2
     /// <summary>
     /// Utils class with useful fonctions
     /// </summary>
-    public static class Utils
+    public static class eUtils
     {
 
         /// <summary>
