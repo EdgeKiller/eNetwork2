@@ -33,11 +33,15 @@ namespace LoginClient
                 byte[] response = client.SendRequest(pw.ToArray());
 
                 PacketReader pr = new PacketReader(response);
-                bool success = pr.ReadBoolean();
+                byte r = pr.ReadByte();
 
-                if(success)
+                if(r == 0)
                 {
                     MessageBox.Show("Connection successful !");
+                }
+                else if(r == 2)
+                {
+                    MessageBox.Show("Banned : " + pr.ReadString());
                 }
                 else
                 {
@@ -45,6 +49,11 @@ namespace LoginClient
                 }
 
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            client.Disconnect();
         }
     }
 }

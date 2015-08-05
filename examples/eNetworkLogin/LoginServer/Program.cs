@@ -9,17 +9,20 @@ namespace LoginServer
     class Program
     {
         static eServer server;
+        static DatabaseManager dbmanager;
 
         static void Main(string[] args)
         {
-            CheckForDatabases();
-
             server = new eServer(666, 667);
             server.OnClientConnected += Server_OnClientConnected;
             server.OnClientDisconnected += Server_OnClientDisconnected;
             server.OnRequestReceived += Server_OnRequestReceived;
 
+            dbmanager = new DatabaseManager("db/database.db");
+
             server.Start();
+
+            Log("Server started, waiting for clients ...");
 
             string command;
 
@@ -34,27 +37,6 @@ namespace LoginServer
             server.Stop();
         }
 
-        private static void CheckForDatabases()
-        {
-            if (!Directory.Exists("db"))
-                Directory.CreateDirectory("db");
-
-            if (!File.Exists("db/database.db"))
-                SQLiteConnection.CreateFile("db/database.db");
-
-            /*
-            SQLiteConnection connection = new SQLiteConnection("Data Source=db/database.db;Version=3;");
-            connection.Open();
-
-
-            SQLiteCommand commande = new SQLiteCommand("insert into accounts (username, password) values ('ttt', 'ttt')", connection);
-            commande.ExecuteNonQuery();
-
-
-
-            connection.Close();*/
-        }
-
         private static void Server_OnRequestReceived(TcpClient client, byte[] buffer)
         {
             PacketReader reader = new PacketReader(buffer);
@@ -63,43 +45,11 @@ namespace LoginServer
 
             if (ID == 1) //Login request
             {
-                Log("Connection request received");
+                Log("Connection request received :");
                 string username = reader.ReadString();
                 string password = reader.ReadString();
-                SQLiteConnection connection = new SQLiteConnection("Data Source=db/database.db;Version=3;");
-                connection.Open();
-
-                byte[] response = null;
-
-                SQLiteCommand command = new SQLiteCommand("select * from accounts where username='" + username + "'", connection);
-                SQLiteDataReader sqlreader = command.ExecuteReader();
-                if (sqlreader.Read())
-                {
-                    if (password == sqlreader["password"].ToString())
-                    {
-                        Log("Connection request accepted");
-                        response = new byte[1];
-                        using (PacketWriter pw = new PacketWriter())
-                        {
-                            pw.WriteBoolean(true);
-                            response = pw.ToArray();
-                        }
-                    }
-                }
-
-                if (response == null)
-                {
-                    Log("Connection request failed");
-                    using (PacketWriter pw = new PacketWriter())
-                    {
-                        pw.WriteBoolean(false);
-                        response = pw.ToArray();
-                    }
-                }
-
-                server.SendTo(response, client);
-
-                connection.Close();
+                byte[] result = dbmanager.LoginRequest(username, password);
+                server.SendTo(result, client);
             }
         }
 
@@ -113,7 +63,7 @@ namespace LoginServer
             Log("New client connected with ID : " + client.GetID());
         }
 
-        private static void Log(object message)
+        public static void Log(object message)
         {
             Console.WriteLine(message);
         }

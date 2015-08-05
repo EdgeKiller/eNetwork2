@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoginServer", "LoginServer\LoginServer.csproj", "{3C59B0C4-C557-4D78-9F96-4CD3B79E4AE1}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoginClient", "LoginClient\LoginClient.csproj", "{7F72E168-1243-4AF4-9CC8-9466D30E012A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoginServer", "LoginServer\LoginServer.csproj", "{7427EB39-59D5-4700-B68F-8487DC467326}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3C59B0C4-C557-4D78-9F96-4CD3B79E4AE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3C59B0C4-C557-4D78-9F96-4CD3B79E4AE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3C59B0C4-C557-4D78-9F96-4CD3B79E4AE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3C59B0C4-C557-4D78-9F96-4CD3B79E4AE1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7F72E168-1243-4AF4-9CC8-9466D30E012A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7F72E168-1243-4AF4-9CC8-9466D30E012A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F72E168-1243-4AF4-9CC8-9466D30E012A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F72E168-1243-4AF4-9CC8-9466D30E012A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7427EB39-59D5-4700-B68F-8487DC467326}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7427EB39-59D5-4700-B68F-8487DC467326}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7427EB39-59D5-4700-B68F-8487DC467326}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7427EB39-59D5-4700-B68F-8487DC467326}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

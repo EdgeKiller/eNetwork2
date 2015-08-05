@@ -86,9 +86,9 @@ namespace eNetwork2
                 return null;
             using (MemoryStream ms = new MemoryStream())
             {
-                using (BufferedStream bs = new BufferedStream(new GZipStream(ms, CompressionMode.Compress), 2048))
+                using (GZipStream gs = new GZipStream(ms, CompressionMode.Compress))
                 {
-                    bs.Write(buffer, 0, buffer.Length);
+                    gs.Write(buffer, 0, buffer.Length);
                 }
                 return ms.ToArray();
             }
@@ -103,16 +103,13 @@ namespace eNetwork2
         {
             if (buffer == null)
                 return null;
-            using (var compressedMs = new MemoryStream(buffer))
+            using (MemoryStream ms = new MemoryStream())
             {
-                using (var decompressedMs = new MemoryStream())
+                using (GZipStream gs = new GZipStream(ms, CompressionMode.Decompress))
                 {
-                    using (var bs = new BufferedStream(new GZipStream(compressedMs, CompressionMode.Decompress), 2048))
-                    {
-                        bs.CopyTo(decompressedMs);
-                    }
-                    return decompressedMs.ToArray();
+                    gs.Write(buffer, 0, buffer.Length);
                 }
+                return ms.ToArray();
             }
         }
 

@@ -18,7 +18,7 @@ namespace eNetwork2
 
         private List<Task> TaskList;
 
-        private TcpClient Client, ClientRequest = null;
+        private TcpClient Client, ClientRequest;
 
         public delegate void DataReceivedHandler(byte[] buffer);
         public event DataReceivedHandler OnDataReceived;
@@ -27,6 +27,8 @@ namespace eNetwork2
         public event ConnectionHandler OnConnected, OnDisconnected;
 
         private int ID = -1;
+
+        public bool Debug { get; set; } = false;
 
         #endregion
 
@@ -45,8 +47,11 @@ namespace eNetwork2
             PortRequest = portRequest;
 
             Client = new TcpClient();
+
             if (PortRequest != -1)
                 ClientRequest = new TcpClient();
+            else
+                ClientRequest = null;
 
             TaskList = new List<Task>();
         }
@@ -58,54 +63,96 @@ namespace eNetwork2
         /// <summary>
         /// Connect the client
         /// </summary>
-        public void Connect()
+        /// <returns>Success</returns>
+        public bool Connect()
         {
-            Client.Connect(Hostname, Port);
-
-            if (ClientRequest != null)
-                ClientRequest.Connect(Hostname, PortRequest);
-
-            byte[] idBuffer = new byte[4];
-            Client.GetStream().Read(idBuffer, 0, idBuffer.Length);
-
-            using (PacketReader pr = new PacketReader(idBuffer))
+            try
             {
-                ID = pr.ReadInt32();
-            }
+                Client.Connect(Hostname, Port);
 
-            if (OnConnected != null)
-                OnConnected();
-            StartHandle();
+                if (ClientRequest != null)
+                    ClientRequest.Connect(Hostname, PortRequest);
+
+                byte[] idBuffer = new byte[4];
+                Client.GetStream().Read(idBuffer, 0, idBuffer.Length);
+
+                using (PacketReader pr = new PacketReader(idBuffer))
+                {
+                    ID = pr.ReadInt32();
+                }
+
+                if (OnConnected != null)
+                    OnConnected();
+                StartHandle();
+
+                DebugMessage("Connected successfully");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                DebugMessage("Failed to connect : " + ex.Message);
+                Disconnect();
+                return false;
+            }
         }
 
         /// <summary>
         /// Disconnect the client
         /// </summary>
-        public void Disconnect()
+        /// <returns>Success</returns>
+        public bool Disconnect()
         {
-            if (Client.Connected)
-                Client.Close();
-
-            if (ClientRequest != null)
+            try
             {
-                if (ClientRequest.Connected)
-                    ClientRequest.Close();
+                Task.WhenAll(TaskList).Wait(100);
+
+                Task.WhenAll(TaskList).Dispose();
+
+                if (Client.Connected)
+                    Client.Close();
+
+                if (ClientRequest != null)
+                {
+                    if (ClientRequest.Connected)
+                        ClientRequest.Close();
+                }
+
+                if (OnDisconnected != null)
+                    OnDisconnected();
+
+                DebugMessage("Disconnected successfully");
+
+
+            }
+            catch (Exception ex)
+            {
+                DebugMessage("Failed to disconnect : " + ex.Message);
+                return false;
             }
 
-            if (OnDisconnected != null)
-                OnDisconnected();
 
-            Task.WhenAll(TaskList).Wait();
+            return true;
         }
 
         /// <summary>
         /// Send a buffer
         /// </summary>
         /// <param name="buffer">Buffer to send</param>
-        public void Send(byte[] buffer)
+        /// <returns>Success</returns>
+        public bool Send(byte[] buffer)
         {
-            byte[] b = eUtils.GetBuffer(buffer);
-            Client.Send(b);
+            try
+            {
+                byte[] b = eUtils.GetBuffer(buffer);
+                Client.Send(b);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                DebugMessage("Failed to send buffer : " + ex.Message);
+                return false;
+            }
         }
 
         /// <summary>
@@ -117,14 +164,15 @@ namespace eNetwork2
         {
             if (ClientRequest != null)
             {
-                byte[] b = eUtils.GetBuffer(buffer);
-                ClientRequest.Send(b);
-
-                byte[] result, resultSize = new byte[2];
-                int size;
-
                 try
                 {
+                    byte[] b = eUtils.GetBuffer(buffer);
+                    ClientRequest.Send(b);
+
+                    byte[] result, resultSize = new byte[2];
+                    int size;
+
+
                     ClientRequest.GetStream().Read(resultSize, 0, resultSize.Length);
 
                     using (PacketReader pr = new PacketReader(resultSize))
@@ -138,12 +186,12 @@ namespace eNetwork2
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    DebugMessage("Failed to send request : " + ex.Message);
                 }
             }
             else
             {
-                throw new Exception("This client cant send request.");
+                DebugMessage("This client cant send request");
             }
             return null;
         }
@@ -161,6 +209,16 @@ namespace eNetwork2
 
         #region PrivateMethodsAndFunctions
 
+        private void DebugMessage(object message)
+        {
+            if (Debug)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("[Debug] " + message);
+                Console.ResetColor();
+            }
+        }
+
         /// <summary>
         /// Start handle client
         /// </summary>
@@ -175,15 +233,18 @@ namespace eNetwork2
         /// <returns></returns>
         private async Task HandleAsync()
         {
-            NetworkStream clientStream = Client.GetStream();
             byte[] buffer, bufferSize = new byte[2];
             int size;
 
             try
             {
+                NetworkStream clientStream = Client.GetStream();
                 while (Client.Connected)
                 {
-                    await clientStream.ReadAsync(bufferSize, 0, bufferSize.Length);
+                    int bytesRead = await clientStream.ReadAsync(bufferSize, 0, bufferSize.Length);
+
+                    if (bytesRead == 0)
+                        break;
 
                     using (PacketReader pr = new PacketReader(bufferSize))
                     {
@@ -196,9 +257,15 @@ namespace eNetwork2
                         OnDataReceived(buffer);
                 }
             }
-            catch { }
+            catch(Exception ex)
+            {
+                DebugMessage("Failed to handle client : " + ex.Message);
+            }
+            finally
+            {
+                Disconnect();
+            }
 
-            Disconnect();
         }
 
         #endregion
