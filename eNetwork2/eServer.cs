@@ -102,8 +102,7 @@ namespace eNetwork2
         {
             try
             {
-                Task.WhenAll(TaskList).Wait(100);
-
+                TaskList.Clear();
                 ClientList.Clear();
 
                 //Stop listen for client
@@ -291,7 +290,7 @@ namespace eNetwork2
                 while (true)
                 {
 
-                    TcpClient client = await this.Listener.AcceptTcpClientAsync();
+                    TcpClient client = await Listener.AcceptTcpClientAsync();
                     Int32 id = (Int32)randomID.Next(10000, 99999);
                     eSClient sClient = new eSClient(id, client);
 

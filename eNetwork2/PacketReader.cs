@@ -131,7 +131,7 @@ namespace eNetwork2
         /// Read a single
         /// </summary>
         /// <returns>Value</returns>
-        public Single ReadFloat()
+        public Single ReadSingle()
         {
             Single result;
             using (MemoryStream ms = new MemoryStream(buffer))

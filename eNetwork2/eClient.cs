@@ -30,6 +30,8 @@ namespace eNetwork2
 
         public bool Debug { get; set; } = false;
 
+        private bool Connected;
+
         #endregion
 
         #region Constructors
@@ -54,6 +56,8 @@ namespace eNetwork2
                 ClientRequest = null;
 
             TaskList = new List<Task>();
+
+            Connected = false;
         }
 
         #endregion
@@ -87,6 +91,8 @@ namespace eNetwork2
 
                 DebugMessage("Connected successfully");
 
+                Connected = true;
+
                 return true;
             }
             catch (Exception ex)
@@ -103,36 +109,39 @@ namespace eNetwork2
         /// <returns>Success</returns>
         public bool Disconnect()
         {
-            try
+            if (Connected)
             {
-                Task.WhenAll(TaskList).Wait(100);
-
-                Task.WhenAll(TaskList).Dispose();
-
-                if (Client.Connected)
-                    Client.Close();
-
-                if (ClientRequest != null)
+                try
                 {
-                    if (ClientRequest.Connected)
-                        ClientRequest.Close();
+                    Task.WhenAll(TaskList).Wait(100);
+
+                    if (Client.Connected)
+                        Client.Close();
+
+                    if (ClientRequest != null)
+                    {
+                        if (ClientRequest.Connected)
+                            ClientRequest.Close();
+                    }
+
+                    if (OnDisconnected != null)
+                        OnDisconnected();
+
+                    DebugMessage("Disconnected successfully");
+
+                    Connected = false;
+
+                    return true;
+
                 }
-
-                if (OnDisconnected != null)
-                    OnDisconnected();
-
-                DebugMessage("Disconnected successfully");
-
-
+                catch (Exception ex)
+                {
+                    DebugMessage("Failed to disconnect : " + ex.Message);
+                    return false;
+                }
             }
-            catch (Exception ex)
-            {
-                DebugMessage("Failed to disconnect : " + ex.Message);
-                return false;
-            }
+            return false;
 
-
-            return true;
         }
 
         /// <summary>
@@ -259,13 +268,14 @@ namespace eNetwork2
             }
             catch(Exception ex)
             {
-                DebugMessage("Failed to handle client : " + ex.Message);
+                //HResult == -2146232800 = Server closed
+                if(Connected && ex.HResult != -2146232800)
+                    DebugMessage("Failed to handle client : " + ex.Message);
             }
             finally
             {
                 Disconnect();
             }
-
         }
 
         #endregion
