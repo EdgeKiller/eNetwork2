@@ -30,6 +30,21 @@ namespace eNetwork2
 
         public bool Debug { get; set; } = false;
 
+        public int RequestTimeout {
+            get
+            {
+                if (ClientRequest != null)
+                    return ClientRequest.ReceiveTimeout;
+                else
+                    return -1;
+            }
+            set
+            {
+                if (ClientRequest != null)
+                    ClientRequest.ReceiveTimeout = value;
+            }
+        }
+
         private bool Connected;
 
         #endregion
@@ -51,7 +66,10 @@ namespace eNetwork2
             Client = new TcpClient();
 
             if (PortRequest != -1)
+            {
                 ClientRequest = new TcpClient();
+                ClientRequest.ReceiveTimeout = 1000;
+            }
             else
                 ClientRequest = null;
 
@@ -113,8 +131,6 @@ namespace eNetwork2
             {
                 try
                 {
-                    Task.WhenAll(TaskList).Wait(100);
-
                     if (Client.Connected)
                         Client.Close();
 
@@ -190,7 +206,9 @@ namespace eNetwork2
                     }
 
                     result = new byte[size];
+
                     ClientRequest.GetStream().Read(result, 0, result.Length);
+
                     return result;
                 }
                 catch (Exception ex)
